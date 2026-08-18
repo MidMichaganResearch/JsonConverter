@@ -18,7 +18,6 @@ PlotData RingForcesParser::parse()
     std::string line;
     constexpr int HEADER_LINES = 5;
     constexpr int COLUMNS = 4;
-    int ROWS_PER_FRAME;             //read the nodes from the header
 
     if (!file.is_open())  return data;        //Not open, so return
 

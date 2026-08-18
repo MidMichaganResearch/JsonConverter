@@ -52,7 +52,7 @@ POS_CYCLE and POS_CONFORM
             try {
                 // Parse the integer from the beginning of the string
                 int number = std::stoi(line);
-                std::cout << "Successfully parsed: " << number << std::endl;
+ //               std::cout << "Successfully parsed: " << number << std::endl;
                 ROWS_PER_FRAME = number; //
             }
             catch (const std::invalid_argument& e) {
@@ -228,7 +228,7 @@ POS_CYCLE and POS_CONFORM
                     << frame[i][2]
                     << std::endl;
             }
-
+            /*
             std::cout
                 << "X Range: "
                 << minX
@@ -249,9 +249,10 @@ POS_CYCLE and POS_CONFORM
                 << " -> "
                 << maxZ
                 << std::endl;
+                */
         }
     }
-
+/*
     std::cout
         << "\nTOTAL FRAMES = "
         << data.frames.size()
@@ -264,6 +265,6 @@ POS_CYCLE and POS_CONFORM
             << data.frames[0].size()
             << std::endl;
     }
-
+*/
     return data;
 }

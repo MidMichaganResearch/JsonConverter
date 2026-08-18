@@ -67,7 +67,7 @@ for (int i = 0; i < HEADER_LINES; i++)
 		try {
 			// Parse the integer from the beginning of the string
 			int number = std::stoi(line);
-			std::cout << "Successfully parsed: " << number << std::endl;
+//			std::cout << "Successfully parsed: " << number << std::endl;
 			ROWS_PER_FRAME = number; //
 		}
 		catch (const std::invalid_argument& e) {
@@ -217,7 +217,7 @@ for (int i = 0; i < HEADER_LINES; i++)
 					<< frame[i][2]
 					<< std::endl;
 			}
-
+			/*
 			std::cout
 				<< "X Range: "
 				<< minX
@@ -238,9 +238,10 @@ for (int i = 0; i < HEADER_LINES; i++)
 				<< " -> "
 				<< maxZ
 				<< std::endl;
+				*/
 		}
 	}
-
+	/*
 	std::cout
 		<< "\nTOTAL FRAMES = "
 		<< data.frames.size()
@@ -253,6 +254,6 @@ for (int i = 0; i < HEADER_LINES; i++)
 			<< data.frames[0].size()
 			<< std::endl;
 	}
-
+	*/
 	return data;
 }

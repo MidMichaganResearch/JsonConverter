@@ -61,7 +61,7 @@ PlotData PressureConformParser::parse()
             try {
                 // Parse the integer from the beginning of the string
                 int number = std::stoi(line);
-                std::cout << "Successfully parsed: " << number << std::endl;
+ //               std::cout << "Successfully parsed: " << number << std::endl;
                 COLUMNS = number; //
             }
             catch (const std::invalid_argument& e) {
@@ -237,12 +237,11 @@ PlotData PressureConformParser::parse()
 		 }
 		 */
 	 }
-
+	 /*
 	 std::cout
 		 << "\nTOTAL FRAMES = "
 		 << data.frames.size()
 		 << std::endl;
-
 	 if (!data.frames.empty())
 	 {
 		 std::cout
@@ -250,6 +249,7 @@ PlotData PressureConformParser::parse()
 			 << data.frames[0].size()
 			 << std::endl;
 	 }
+	  */
 
 	 return data;
 }

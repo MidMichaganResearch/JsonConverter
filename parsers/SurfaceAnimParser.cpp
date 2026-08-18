@@ -64,7 +64,7 @@ PlotData SurfaceAnimParser::parse()
             try {
                 // Parse the integer from the beginning of the string
                 int number = std::stoi(line);
-                std::cout << "Successfully parsed: " << number << std::endl;
+ //               std::cout << "Successfully parsed: " << number << std::endl;
                 NODES = number; //
             }
             catch (const std::invalid_argument& e) {
@@ -210,11 +210,11 @@ PlotData SurfaceAnimParser::parse()
         data.matrix =
             data.frames.front();
     }
-
+    /*
     std::cout
         << "TOTAL FRAMES: "
         << data.frames.size()
         << std::endl;
-
+    */
     return data;
 }
