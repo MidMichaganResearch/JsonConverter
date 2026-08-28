@@ -67,9 +67,8 @@ int main(int argc, char* argv[])
     out.close();
 
     std::cout
-        << "\nJSON created successfully:\n"
-        << outputFile
-        << std::endl;
+        << "\nJSON created: "
+        << outputFile;
 
     return 0;
 }
