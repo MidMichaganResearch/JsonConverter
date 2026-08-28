@@ -439,12 +439,22 @@ std::string JsonBuilder::buildAnimatedSurface(
     ------------------------------------------------------------
     */
 
-    AnimationControlsWriter::writeSlider(
-        json,
-        data,
-        5);
-
-    json << "}";
+    if (data.frames.size() >= 719)              //normally a crank angle od 720, bur might just be a frame
+    {
+        AnimationControlsWriter::writeSlider(
+            json,
+            data,
+            30,
+            "Crank Angle: ");
+    }
+    else
+    {
+        AnimationControlsWriter::writeSlider(
+            json,
+            data,
+            30,
+            "Frame: ");
+            }
 
     json << ",";
 
@@ -716,13 +726,22 @@ std::string JsonBuilder::buildAnimatedScatter3D(
     SLIDER
     ------------------------------------------------------------
     */
-
-    AnimationControlsWriter::writeSlider(
-        json,
-        data,
-        40,
-        "Crank Angle: ");
-
+	if (data.frames.size() >= 719)              //normally a crank angle od 720, bur might just be a frame
+	{
+		AnimationControlsWriter::writeSlider(
+			json,
+			data,
+			40,
+			"Crank Angle: ");
+	}
+	else
+	{
+		AnimationControlsWriter::writeSlider(
+			json,
+			data,
+			40,
+			"Frame: ");
+	}
     json << "},";
 
     /*

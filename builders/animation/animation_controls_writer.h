@@ -18,5 +18,5 @@ public:
         std::ostringstream& json,
         const PlotData& data,
         int topPadding,
-        const std::string& prefix = "Crank Angle: ");
+        const std::string& prefix = "");
 };
