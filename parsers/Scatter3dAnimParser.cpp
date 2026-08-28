@@ -207,6 +207,7 @@ POS_CYCLE and POS_CONFORM
         SAMPLE OUTPUT
         ============================================================
         */
+        /*
 
         if (data.frames.size() <= 5)
         {
@@ -228,7 +229,6 @@ POS_CYCLE and POS_CONFORM
                     << frame[i][2]
                     << std::endl;
             }
-            /*
             std::cout
                 << "X Range: "
                 << minX
@@ -249,9 +249,9 @@ POS_CYCLE and POS_CONFORM
                 << " -> "
                 << maxZ
                 << std::endl;
-                */
         }
-    }
+        */
+   }
 /*
     std::cout
         << "\nTOTAL FRAMES = "
