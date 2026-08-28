@@ -26,9 +26,11 @@ struct Series
 
 struct PlotData
 {
-    PlotType plotType;
+    // default initialized to avoid C26495 uninitialized-member warning
+    // (choose Scatter as a sensible default; adjust if needed)
+    PlotType plotType = PlotType::Scatter;
 
-    std::string title;
+    std::string title;    
     std::string subtitle;
 
     std::string xLabel;
