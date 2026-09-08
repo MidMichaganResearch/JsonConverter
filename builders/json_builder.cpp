@@ -454,9 +454,11 @@ std::string JsonBuilder::buildAnimatedSurface(
             data,
             30,
             "Frame: ");
-            }
+    }
+    json << "}";
 
     json << ",";
+
 
     /*
     ============================================================
