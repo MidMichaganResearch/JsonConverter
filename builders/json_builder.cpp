@@ -6,6 +6,11 @@
 #include <sstream>
 #include <iomanip>
 
+
+/// <summary>
+/// Main entry point for the builders.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::build(
     const PlotData& data)
 {
@@ -28,6 +33,11 @@ std::string JsonBuilder::build(
     }
 }
 
+/// <summary>
+/// Builder for 3D scatter plots.
+/// If the data contains frames, it will build an animated plot; otherwise, it will build a static plot.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::buildScatter3D(
     const PlotData& data)
 {
@@ -39,6 +49,11 @@ std::string JsonBuilder::buildScatter3D(
     return buildStaticScatter3D(data);
 }
 
+/// <summary>
+/// Builder for surface plots.
+/// If the data contains frames, it will build an animated plot; otherwise, it will build a static plot.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::buildSurface(
     const PlotData& data)
 {
@@ -50,6 +65,10 @@ std::string JsonBuilder::buildSurface(
     return buildStaticSurface(data);
 }
 
+/// <summary>
+/// Builder for 2D scatter plots.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::buildScatter(
     const PlotData& data)
 {
@@ -133,22 +152,86 @@ std::string JsonBuilder::buildScatter(
     return json.str();
 }
 
+/// <summary>
+/// Builder for 3D surface plots.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::buildStaticSurface(
     const PlotData& data)
 {
+    if (data.matrix.empty())
+    {
+        return "{}";
+    }
+
     std::ostringstream json;
 
     json << std::fixed
         << std::setprecision(6);
 
+    /*
+    ============================================================
+    COMPUTE AXIS RANGES
+    ============================================================
+    */
+
+    // X and Y use implicit 0-based indices from matrix dimensions.
+    const double xRawMin = 0.0;
+    const double xRawMax = static_cast<double>(data.matrix[0].size()) - 1.0;
+    const double yRawMin = 0.0;
+    const double yRawMax = static_cast<double>(data.matrix.size()) - 1.0;
+
+    const double xPad = (xRawMax - xRawMin) * 0.05;
+    const double yPad = (yRawMax - yRawMin) * 0.05;
+
+    const double xMin = xRawMin - xPad;
+    const double xMax = xRawMax + xPad;
+    const double yMin = yRawMin - yPad;
+    const double yMax = yRawMax + yPad;
+
+    // Z scan the single matrix for min/max.
+    double zRawMin = data.matrix[0][0];
+    double zRawMax = data.matrix[0][0];
+
+    for (const auto& row : data.matrix)
+    {
+        for (double val : row)
+        {
+            if (val < zRawMin) zRawMin = val;
+            if (val > zRawMax) zRawMax = val;
+        }
+    }
+
+    const double zPad = (zRawMax - zRawMin) * 0.05;
+    const double zMin = zRawMin - zPad;
+    const double zMax = zRawMax + zPad;
+
     json << "{";
 
-    json << "\"data\":[";
+    /*
+    ============================================================
+    DATA
+    ============================================================
+    */
 
-    json << "{";
-
+    json << "\"data\":[{";
     json << "\"type\":\"surface\",";
-    json << "\"colorscale\":\"Viridis\",";
+    json << "\"colorscale\":\"Jet\",";
+    json << "\"cmin\":" << zRawMin << ",";
+    json << "\"cmax\":" << zRawMax << ",";
+    json << "\"showscale\":true,";
+
+    json << "\"colorbar\":{";
+    json << "\"x\":1.02,";
+    json << "\"title\":{\"text\":\"" << data.zLabel << "\"},";
+    json << "\"nticks\":10";
+    json << "},";
+
+    json << "\"hovertemplate\":\""
+        << data.xLabel << ": %{x}<br>"
+        << data.yLabel << ": %{y}<br>"
+        << data.zLabel << ": %{z}"
+        << "<extra></extra>\",";
 
     json << "\"z\":";
 
@@ -156,15 +239,31 @@ std::string JsonBuilder::buildStaticSurface(
         json,
         data.matrix);
 
-    json << "}";
+    json << "}],";
 
-    json << "],";
+    /*
+    ============================================================
+    LAYOUT
+    ============================================================
+    */
 
     json << "\"layout\":{";
 
-    LayoutWriter::write3DLayout(
+    LayoutWriter::writeTitle(
         json,
-        data);
+        data.title);
+
+    json << ",";
+
+    LayoutWriter::writeAnimatedScene(
+        json,
+        data,
+        xMin,
+        xMax,
+        yMin,
+        yMax,
+        zMin,
+        zMax);
 
     json << "}";
 
@@ -173,6 +272,12 @@ std::string JsonBuilder::buildStaticSurface(
     return json.str();
 }
 
+/// <summary>
+/// Builder for 2D heatmap plots.
+/// 
+/// Currently, this builder is outdated and is not used.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::buildHeatmap(
     const PlotData& data)
 {
@@ -213,6 +318,10 @@ std::string JsonBuilder::buildHeatmap(
     return json.str();
 }
 
+/// <summary>
+/// Builder for 3D scatter plots.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::buildStaticScatter3D(
     const PlotData& data)
 {
@@ -299,6 +408,10 @@ std::string JsonBuilder::buildStaticScatter3D(
     return json.str();
 }
 
+/// <summary>
+/// Builder for animated surface plots.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::buildAnimatedSurface(
     const PlotData& data)
 {
@@ -320,7 +433,6 @@ std::string JsonBuilder::buildAnimatedSurface(
 
     // X and Y use implicit 0-based indices from matrix dimensions.
     // The range is therefore fixed by frame structure, not measured values.
-
     const double xRawMin = 0.0;
     const double xRawMax = static_cast<double>(data.frames[0][0].size()) - 1.0;
     const double yRawMin = 0.0;
@@ -335,7 +447,6 @@ std::string JsonBuilder::buildAnimatedSurface(
     const double yMax = yRawMax + yPad;
 
     // Z: scan every value across all frames for global min/max.
-
     double zRawMin = data.frames[0][0][0];
     double zRawMax = data.frames[0][0][0];
 
@@ -439,7 +550,7 @@ std::string JsonBuilder::buildAnimatedSurface(
     ------------------------------------------------------------
     */
 
-    if (data.frames.size() >= 719)              //normally a crank angle od 720, bur might just be a frame
+    if (data.frames.size() >= 719)              //normally a crank angle od 720, but might just be a frame.
     {
         AnimationControlsWriter::writeSlider(
             json,
@@ -475,6 +586,11 @@ std::string JsonBuilder::buildAnimatedSurface(
     return json.str();
 }
 
+/// <summary>
+/// Sub-builder for wwriting the data matrix for surface plots and heatmaps.
+/// </summary>
+/// <param name="json"> The JSON stream to write to. </param>
+/// <param name="matrix"> The matrix to write. </param>
 void JsonBuilder::writeMatrix(
     std::ostringstream& json,
     const std::vector<std::vector<double>>& matrix)
@@ -506,6 +622,10 @@ void JsonBuilder::writeMatrix(
     json << "]";
 }
 
+/// <summary>
+/// Builder for animated 3D scatter plots.
+/// </summary>
+/// <param name="data"> The plot data to convert to JSON. </param>
 std::string JsonBuilder::buildAnimatedScatter3D(
     const PlotData& data)
 {
@@ -576,7 +696,6 @@ std::string JsonBuilder::buildAnimatedScatter3D(
     json << "\"name\":\"Points\",";
 
     // X
-
     json << "\"x\":[";
     for (size_t i = 0; i < firstFrame.size(); i++)
     {
@@ -586,7 +705,6 @@ std::string JsonBuilder::buildAnimatedScatter3D(
     json << "],";
 
     // Y
-
     json << "\"y\":[";
     for (size_t i = 0; i < firstFrame.size(); i++)
     {
@@ -596,7 +714,6 @@ std::string JsonBuilder::buildAnimatedScatter3D(
     json << "],";
 
     // Z
-
     json << "\"z\":[";
     for (size_t i = 0; i < firstFrame.size(); i++)
     {
@@ -606,7 +723,6 @@ std::string JsonBuilder::buildAnimatedScatter3D(
     json << "],";
 
     // CUSTOM DATA (TWIST)
-
     json << "\"customdata\":[";
     for (size_t i = 0; i < firstFrame.size(); i++)
     {
@@ -616,7 +732,6 @@ std::string JsonBuilder::buildAnimatedScatter3D(
     json << "],";
 
     // HOVER TEMPLATE
-
     json << "\"hovertemplate\":\"";
     json << "Node #: %{pointNumber}<br>";
     json << data.xLabel << ": %{x}<br>";
@@ -626,14 +741,12 @@ std::string JsonBuilder::buildAnimatedScatter3D(
     json << "<extra></extra>\",";
 
     // LINE
-
     json << "\"line\":{";
     json << "\"color\":\"#378ADD\",";
     json << "\"width\":4";
     json << "},";
 
     // MARKER
-
     json << "\"marker\":{";
     json << "\"size\":7,";
 
@@ -728,22 +841,22 @@ std::string JsonBuilder::buildAnimatedScatter3D(
     SLIDER
     ------------------------------------------------------------
     */
-	if (data.frames.size() >= 719)              //normally a crank angle od 720, bur might just be a frame
-	{
-		AnimationControlsWriter::writeSlider(
-			json,
-			data,
-			40,
-			"Crank Angle: ");
-	}
-	else
-	{
-		AnimationControlsWriter::writeSlider(
-			json,
-			data,
-			40,
-			"Frame: ");
-	}
+    if (data.frames.size() >= 719)              //normally a crank angle od 720, but might just be a frame.
+    {
+        AnimationControlsWriter::writeSlider(
+            json,
+            data,
+            40,
+            "Crank Angle: ");
+    }
+    else
+    {
+        AnimationControlsWriter::writeSlider(
+            json,
+            data,
+            40,
+            "Frame: ");
+    }
     json << "},";
 
     /*
